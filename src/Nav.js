@@ -1,14 +1,18 @@
+import { Link, Outlet } from "react-router-dom"
 
-
-const Nav=()=>{
-    const arr=['Home','About','contact','Home','About','contact']
-    return <nav>
-        <ul>
-            {
-                arr.map((value,i)=><li key={value+i}>{value}</li>)
-            }
-        </ul>
-    </nav>
+const Nav = () => {
+    return (
+        <>
+        <nav>
+            <ul>
+                <Link to='calculator'><li>Calculator</li></Link>
+                
+                <Link to='country'><li>Country</li></Link>
+            </ul>
+        </nav>
+        <Outlet />
+        </>
+    )
 }
 
 export default Nav
