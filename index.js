@@ -1,39 +1,39 @@
-const http = require('http')
-const PATH = require('path')
-const fs=require('fs')
-const ConvertorFiletoData = require('./Utils/ConvertorFiletoData')
-const fspromise=fs.promises
+const express=require('express')
+const authendicate = require('./middleware/authendicate')
+const jwt=require('jsonwebtoken')
+const { token } = require('./config')
+const cors=require('cors')
 
+const app=express()
 
-const server = http.createServer((req, res) => {
-    const path = req.url
-    if (path === '/') res.end('Node api')
-    else if (path === '/login') {
-        req.on('data',async (data)=>{
-            const fileData=await fspromise.readFile(PATH.join(__dirname,'data.txt'))
-            const credentialData=ConvertorFiletoData(fileData.toString())
-            const inputData=JSON.parse(data.toString())
-            const LoginData=credentialData.find((data)=>data.name===inputData.name)
-            // console.log(LoginData,inputData);
-            
-            // console.log(inputData.password,LoginData.password,typeof(inputData.password),typeof(LoginData.password));
-            
-            if(!LoginData || inputData.password.toString()!==LoginData.password){
-                res.end('Invalid credential')
-            }else{
-                res.end('Login success')
-            }
-        })
-    }
-    else {
-        res.end('404 Page Not found')
-    }
+app.use(express.json())
+app.use(cors())
+
+app.use(authendicate)
+
+app.get('/login',(req,res)=>{
+    const authtoken=jwt.sign({
+        data:new Date().toUTCString(),
+        username:req.body.name
+    },token)
+    res.end(authtoken)
 })
 
-server.listen(8090, (error) => {
-    if (error) console.log(error);
-    console.log('Server running on 8090')
+app.get('/getData',(req,res)=>{
+    
+    res.end("Datas")
 })
 
+app.use('*',(req,res)=>{
+    res.end('404 not found')
+})
 
-// console.log(__dirname,__filename);
+// global error handler 
+app.use((err,req,res,next)=>{
+    console.log(err.message);
+    res.end('something went wrong')
+})
+
+app.listen(8090,()=>{
+    console.log('Server is running on 8090')
+})
